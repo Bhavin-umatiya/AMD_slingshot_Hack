@@ -34,11 +34,28 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Define directory paths
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // ── Protected API Routes ───────────────────────────────────────────────
 app.use("/api/users", authMiddleware, userRoutes);
 app.use("/api/food-logs", authMiddleware, foodLogRoutes);
 app.use("/api/goals", authMiddleware, goalRoutes);
 app.use("/api/ai", authMiddleware, aiRoutes);
+
+// ── Static Frontend Serving (For Docker / GCP) ─────────────────────────
+app.use(express.static(path.join(__dirname, "public")));
+
+// ── React Router Fallback ──────────────────────────────────────────────
+// Any non-API request goes to React so frontend routing works
+app.get("*", (req, res, next) => {
+  if (req.path.startsWith("/api")) return next();
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
 
 // ── 404 handler ────────────────────────────────────────────────────────
 app.use((req, res) => {
