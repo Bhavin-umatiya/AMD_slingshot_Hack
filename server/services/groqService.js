@@ -2,9 +2,16 @@
 // Wraps all AI interactions using llama3-70b-8192 model
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+let groq = null;
+try {
+  groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+} catch (error) {
+  console.warn("⚠️ GROQ_API_KEY is missing! AI endpoints will fail if called.");
+  // Provide dummy object so it doesn't crash the entire server
+  groq = { chat: { completions: { create: async () => ({ choices: [{ message: { content: "AI is currently offline. Please configure GROQ_API_KEY in the environment." } }] }) } } };
+}
 
 const MODEL = "llama3-70b-8192";
 
