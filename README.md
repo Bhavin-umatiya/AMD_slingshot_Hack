@@ -166,32 +166,31 @@ All endpoints (except health) require `Authorization: Bearer <firebase_token>`.
 | POST | `/api/ai/chat` | Chat with AI |
 | GET | `/api/ai/context-advice` | Get context-aware advice |
 
-## 🚀 Deployment
+## 🚀 Deployment (Google Cloud Run)
 
-### Frontend → Vercel
+This project has been explicitly containerized to deploy both the **Frontend** and **Backend** as a single seamless service on Google Cloud Platform. 
 
+### Method 1: The Magic Button
+The absolute fastest way to deploy this to GCP is via the automated Cloud Run Deploy Button. Click the button below, select your region, and provide your `GROQ_API_KEY`:
+
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/Bhavin-umatiya/AMD_slingshot_Hack.git)
+
+### Method 2: Google Cloud Shell
+1. Open Google Cloud Shell (`>_` icon top right).
+2. Download Code: `git clone https://github.com/Bhavin-umatiya/AMD_slingshot_Hack.git`
+3. Deploy 🚀:
 ```bash
-cd client
-npm run build
-# Deploy the 'dist' folder to Vercel
-# Set environment variables in Vercel dashboard
+cd AMD_slingshot_Hack
+gcloud run deploy nutriai --source . --port 8080 --allow-unauthenticated --set-env-vars="GROQ_API_KEY=your_groq_key"
 ```
 
-Or use Vercel CLI:
-```bash
-npx vercel --prod
-```
-
-Set `VITE_API_URL` to your deployed backend URL.
-
-### Backend → Render / Railway
-
-1. Push `server/` to a Git repository
-2. Connect to [Render](https://render.com) or [Railway](https://railway.app)
-3. Set build command: `npm install`
-4. Set start command: `npm start`
-5. Add all environment variables from `.env`
-6. Upload `serviceAccountKey.json` or set its content as an env var
+### Method 3: Cloud Run GitHub Integration
+1. Go to [Cloud Run](https://console.cloud.google.com/run).
+2. Click **Create Service** → **Continuously deploy from a repository**.
+3. Point it to this GitHub repo.
+4. **Action Required:** Under "Build Configuration", you **MUST** select `Dockerfile` (Source location `/Dockerfile`).
+5. Under Variables & Secrets, set `GROQ_API_KEY`.
+6. Deploy!
 
 ### Database → Firebase Firestore
 
