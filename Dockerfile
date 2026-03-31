@@ -19,17 +19,19 @@ COPY server/ ./
 FROM node:20-alpine
 WORKDIR /app
 
-# Copy backend files
+# Copy backend files from server build stage
 COPY --from=build-server /app/server/package*.json ./
 COPY --from=build-server /app/server/node_modules ./node_modules
 COPY --from=build-server /app/server ./
 
-# Copy built frontend into backend's public directory
-COPY --from=build-client /app/client/dist ./public
+# Explicitly ensure the public folder exists and copy the frontend assets there
+RUN mkdir -p public
+COPY --from=build-client /app/client/dist/ ./public/
 
 # Expose port (Cloud Run defaults to 8080)
 EXPOSE 8080
 ENV PORT=8080
 ENV NODE_ENV=production
 
+# Boot from the root
 CMD ["node", "server.js"]

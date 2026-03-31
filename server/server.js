@@ -48,13 +48,24 @@ app.use("/api/goals", authMiddleware, goalRoutes);
 app.use("/api/ai", authMiddleware, aiRoutes);
 
 // ── Static Frontend Serving (For Docker / GCP) ─────────────────────────
-app.use(express.static(path.join(__dirname, "public")));
+// Use absolute path for public directory
+const STATIC_PATH = path.join(__dirname, "public");
+app.use(express.static(STATIC_PATH));
 
 // ── React Router Fallback ──────────────────────────────────────────────
 // Any non-API request goes to React so frontend routing works
 app.get("*", (req, res, next) => {
-  if (req.path.startsWith("/api")) return next();
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  // If the path starts with /api or /assets, it shouldn't hit the HTML fallback
+  if (req.path.startsWith("/api") || req.path.startsWith("/assets")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  
+  res.sendFile(path.join(STATIC_PATH, "index.html"), (err) => {
+    if (err) {
+      console.error("Error sending index.html:", err);
+      res.status(500).send("Server Error: Missing index.html");
+    }
+  });
 });
 
 // ── 404 handler ────────────────────────────────────────────────────────
